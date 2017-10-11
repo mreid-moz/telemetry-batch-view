@@ -168,11 +168,11 @@ object MainSummaryView {
         val s3path = s"s3://${conf.outputBucket()}/$s3prefix"
 
         // Repartition the dataframe by sample_id before saving.
-        val partitioned = records.repartition(100, records.col("sample_id"))
+        //val partitioned = records.repartition(100, records.col("sample_id"))
 
         // Then write to S3 using the given fields as path name partitions. Overwrites
         // existing data.
-        partitioned.write.partitionBy("sample_id").mode("overwrite").parquet(s3path)
+        records.repartition(5).write.partitionBy("sample_id").mode("overwrite").parquet(s3path)
 
         // Then remove the _SUCCESS file so we don't break Spark partition discovery.
         S3Store.deleteKey(conf.outputBucket(), s"$s3prefix/_SUCCESS")
@@ -182,8 +182,6 @@ object MainSummaryView {
       println("     RECORDS SEEN:    %d".format(ignoredCount.value + processedCount.value))
       println("     RECORDS IGNORED: %d".format(ignoredCount.value))
       println("=======================================================================================")
-
-      sc.stop()
     }
   }
 

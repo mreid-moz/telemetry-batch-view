@@ -2,7 +2,7 @@ javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint")
 
 resolvers += "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 
-val sparkVersion = "2.0.2"
+val sparkVersion = "2.2.0"
 
 lazy val root = (project in file(".")).
   settings(
@@ -53,6 +53,11 @@ assemblyMergeStrategy in assembly := {
   case PathList("META-INF", xs @ _*) => MergeStrategy.discard
   case x => MergeStrategy.first
 }
+
+// Shade PB files
+assemblyShadeRules in assembly := Seq(
+  ShadeRule.rename("com.google.protobuf.**" -> "shadeproto.@1").inAll
+)
 
 // Disable parallel execution to avoid multiple SparkContexts
 parallelExecution in Test := false
